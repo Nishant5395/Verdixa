@@ -23,7 +23,7 @@
 //   }
 //   const onEditHandler=(add:Address)=>{
 //     setForm({label:add.label,address:add.address,city:add.city,state:add.state,zip:add.zip,isDefault:add.isDefault})
-//     setEditingId(add._id)
+//     setEditingId(add.id)
 //     setShowForm(true)
 //   }
 //   useEffect(()=>{
@@ -60,7 +60,7 @@
 //           ):(
 //             <div className="space-y-4">
 //               {addresses.map((addr)=>(
-//                 <AddressCard key={addr._id} addr={addr}
+//                 <AddressCard key={addr.id} addr={addr}
 //                 onEditHandler={onEditHandler} setAddresses={setAddresses}/>
 //               ))}
 //             </div>
@@ -80,8 +80,6 @@ import React, {
   useState,
 } from "react";
 
-import { dummyAddressData } from "../assets/assets";
-
 import type { Address } from "../types";
 
 import {
@@ -94,8 +92,14 @@ import Loading from "../components/Loading";
 import AddressCard from "../components/AddressCard";
 
 import AddressForm from "../components/AddressForm";
+import { useAuth } from "../context/authContext";
+import api from "../config/api";
+import { toast } from "react-hot-toast";
 
 const Addresses = () => {
+
+  const {updateUser}=useAuth()
+
   const [addresses, setAddresses] =
     useState<Address[]>([]);
 
@@ -131,16 +135,67 @@ const Addresses = () => {
 
     setShowForm(false);
   };
-
+const getLocation=(retries=3):Promise<{lat:number;lng:number}>=>{
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation){
+      reject(new Error("Geolocation not supported"))
+      return;
+    }
+    const attempt = ()=>{
+      navigator.geolocation.getCurrentPosition(
+        (position)=>{
+          resolve({
+            lat:position.coords.latitude,
+            lng:position.coords.longitude,
+          })
+        },
+        (error:any)=>{
+          if(retries>0){
+            retries--;
+            setTimeout(attempt,1000)
+          }else{
+            reject(new Error(error.message || "Failed to get location afeter retries"))
+          }
+        },{
+          enableHighAccuracy:false,
+          timeout:15000,
+          maximumAge:60000,
+        }
+      )
+    };
+    attempt()
+  })
+}
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
 
+    try {
+      const coords=await getLocation()
+      const payload={...form,...coords}
+
+      if(editingId){
+        const {data}=await api.put(`/addresses/${editingId}`,payload);
+        setAddresses(data.addresses)
+        updateUser({addresses:data.addresses})
+        toast.success("Address updated!")
+      }else{
+         const {data}=await api.post(`/addresses`,payload);
+        setAddresses(data.addresses)
+        updateUser({addresses:data.addresses})
+        toast.success("Address added!")
+      }
+      resetForm()
+    } catch (error:any) {
+      toast.error(error.response?.data?.message || error.message || "Failed");
+      
+    }
+
     if (editingId) {
       setAddresses((prev) =>
         prev.map((addr) =>
-          addr._id === editingId
+          addr.id === editingId
             ? {
                 ...addr,
                 ...form,
@@ -155,7 +210,7 @@ const Addresses = () => {
       );
     } else {
       const newAddress: Address = {
-  _id: Date.now().toString(),
+  id: Date.now().toString(),
   label: form.label,
   address: form.address,
   city: form.city,
@@ -192,18 +247,19 @@ const Addresses = () => {
       isDefault: add.isDefault,
     });
 
-    setEditingId(add._id);
+    setEditingId(add.id);
 
     setShowForm(true);
   };
 
   useEffect(() => {
-    setAddresses(dummyAddressData);
-
-    setTimeout(
-      () => setLoading(false),
-      1000
-    );
+   api.get('/addresses').then(({data})=>{
+    setAddresses(data.addresses)
+   }).catch((error:any)=>{
+    toast.error(error.response?.data?.message || error?.message)
+   }).finally(()=>{
+    setLoading(false)
+   })
   }, []);
 
   return (
@@ -266,7 +322,7 @@ const Addresses = () => {
           <div className="space-y-5">
             {addresses.map((addr) => (
               <AddressCard
-                key={addr._id}
+                key={addr.id}
                 addr={addr}
                 onEditHandler={
                   onEditHandler

@@ -33,7 +33,7 @@ function seededRandom(seed: string) {
 
 export default function DummyReviewsSection({ product }: { product: Product }) {
     const reviews = useMemo(() => {
-        const rng = seededRandom(product._id);
+        const rng = seededRandom(product.id);
         const count = Math.min(product.reviewCount, 6);
         const daysAgo = [3, 7, 14, 21, 35, 48];
         return Array.from({ length: count }, (_, i) => {

@@ -12,7 +12,7 @@
 //         console.log(id)
 //     }
 //   return (
-//     <div key={addr._id} className='max-w-3xl bg-white rounded-2xl p-6 items-start justify-between'>
+//     <div key={addr.id} className='max-w-3xl bg-white rounded-2xl p-6 items-start justify-between'>
 //         {/* left */}
 //         <div className="flex gap-4">
 //             <div className="size-10 rounded-xl bg-app-cream flex-center shrink-0">
@@ -40,7 +40,7 @@
 //                 className="p-2 text-app-text-light hover:text-app-green hover:bg-app-cream rounded-lg transition-colors">
 //                     <PencilIcon className="size-4"/>
 //                 </button>
-//             <button onClick={()=>handleDelete(addr._id)}
+//             <button onClick={()=>handleDelete(addr.id)}
 //                 className="p-2 text-app-text-light hover:text-app-error hover:bg-red-50 rounded-lg transition-colors">
 //                     <Trash2Icon className="size-4"/>
 //                 </button>
@@ -61,6 +61,9 @@ import {
 } from "lucide-react";
 
 import type { Address } from "../types";
+import api from "../config/api";
+import { useAuth } from "../context/authContext";
+import { toast } from "react-hot-toast";
 
 interface AddressCardProps {
   addr: Address;
@@ -72,12 +75,23 @@ interface AddressCardProps {
 
 const AddressCard = ({
   addr,
-  onEditHandler,
+  onEditHandler,setAddresses
 }: AddressCardProps) => {
+  const {updateUser}=useAuth()
   const handleDelete = async (
     id: string
   ) => {
-    console.log(id);
+    try {
+      const confirm=window.confirm("Are you sure want to delete this address?");
+      if(!confirm)return;
+      const {data}=await api.delete(`/addresses/${id}`);
+       setAddresses(data.addresses);
+       updateUser({addresses:data.addresses})
+       toast.success('Address removed')
+    } catch (error:any) {
+      toast.error(error.response?.data?.message || error?.message);
+    }
+   
   };
 
   return (
@@ -125,7 +139,7 @@ const AddressCard = ({
 
           <button
             onClick={() =>
-              handleDelete(addr._id)
+              handleDelete(addr.id)
             }
             className="size-11 rounded-xl border border-zinc-200 hover:border-red-300 hover:bg-red-50 flex items-center justify-center transition-all"
           >

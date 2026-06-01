@@ -34,7 +34,7 @@
 //       ):(
 //         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
 //           {products.map((product)=>product.stock>0 && (
-//             <ProductCard key={product._id} product={product}/>
+//             <ProductCard key={product.id} product={product}/>
 //           ))}
 //         </div>
 //       )
@@ -47,7 +47,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Product } from "../types";
 
-import { dummyProducts } from "../assets/assets";
+//import { dummyProducts } from "../assets/assets";
 
 import {
   Clock3,
@@ -58,6 +58,8 @@ import {
 
 import Loading from "../components/Loading";
 import ProductCard from "../components/ProductCard";
+import api from "../config/api";
+import { toast } from "react-hot-toast";
 
 const FlashDeals = () => {
   const [products, setProducts] =
@@ -69,23 +71,7 @@ const FlashDeals = () => {
   /* ---------------- FETCH PRODUCTS ---------------- */
 
   useEffect(() => {
-    setLoading(true);
-
-    const timer = setTimeout(() => {
-      // Only discounted & in-stock products
-      const flashProducts =
-        dummyProducts.filter(
-          (p: any) =>
-            p.stock > 0 &&
-            p.discount > 0
-        );
-
-      setProducts(flashProducts);
-
-      setLoading(false);
-    }, 900);
-
-    return () => clearTimeout(timer);
+    api.get("/products/flash-deals").then((res)=>setProducts(res.data.products)).catch((error:any)=>toast.error(error.response.data.message || error?.message)).finally(()=>setLoading(false))
   }, []);
 
   /* ---------------- RANDOM DEAL STATS ---------------- */
@@ -104,7 +90,7 @@ const FlashDeals = () => {
     <div className="min-h-screen bg-zinc-50">
 
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-orange-400 to-red-500 text-white">
+      <section className="relative overflow-hidden bg-linear-to-r from-orange-500 via-orange-400 to-red-500 text-white">
         
         {/* Glow Effects */}
         <div className="absolute top-0 left-0 size-72 bg-yellow-300/20 rounded-full blur-3xl" />
@@ -221,7 +207,7 @@ const FlashDeals = () => {
         ) : products.length === 0 ? (
 
           /* EMPTY STATE */
-          <div className="bg-white border border-zinc-200 rounded-[32px] py-24 text-center shadow-sm">
+          <div className="bg-white border border-zinc-200 rounded-4xl py-24 text-center shadow-sm">
             
             <div className="size-20 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-6">
               <Zap className="size-10 text-orange-500" />
@@ -244,7 +230,7 @@ const FlashDeals = () => {
             {products.map(
               (product) => (
                 <ProductCard
-                  key={product._id}
+                  key={product.id}
                   product={product}
                 />
               )

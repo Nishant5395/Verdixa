@@ -17,11 +17,11 @@ export default function DeliveryOrderCard({ order, tab, handleUpdateStatus, setO
     const user = typeof order.user === "object" ? order.user : { name: "Customer", email: "", phone: "" };
 
     return (
-        <div key={order._id} className="bg-white rounded-2xl border border-app-border overflow-hidden">
+        <div key={order.id} className="bg-white rounded-2xl border border-app-border overflow-hidden">
             {/* Header */}
             <div className="px-5 py-4 border-b border-app-border flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <span className="text-sm font-mono text-zinc-500">#{order._id.slice(-6).toUpperCase()}</span>
+                    <span className="text-sm font-mono text-zinc-500">#{order.id.slice(-6).toUpperCase()}</span>
                     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${statusColors[order.status] || "bg-zinc-100 text-zinc-600"}`}>
                         {order.status}
                     </span>
@@ -56,18 +56,18 @@ export default function DeliveryOrderCard({ order, tab, handleUpdateStatus, setO
             {tab === "active" && (
                 <div className="px-5 py-3 border-t border-app-border flex flex-wrap gap-2">
                     {(order.status === "Assigned" || order.status === "Packed") && (
-                        <button onClick={() => handleUpdateStatus(order._id, order.status === "Assigned" ? "Packed" : "Out for Delivery")} className="px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-1.5">
+                        <button onClick={() => handleUpdateStatus(order.id, order.status === "Assigned" ? "Packed" : "Out for Delivery")} className="px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-1.5">
                             <TruckIcon className="w-3.5 h-3.5" />
                             {order.status === "Assigned" ? "Mark Packed" : "Out for Delivery"}
                         </button>
                     )}
                     {order.status === "Out for Delivery" && (
-                        <button onClick={() => setOtpModal(order._id)} className="px-4 py-2 text-sm font-medium bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors flex items-center gap-1.5">
+                        <button onClick={() => setOtpModal(order.id)} className="px-4 py-2 text-sm font-medium bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors flex items-center gap-1.5">
                             <CheckCircleIcon className="w-3.5 h-3.5" /> Mark Delivered
                         </button>
                     )}
                     {order.status !== "Delivered" && order.status !== "Cancelled" && (
-                        <button onClick={() => setCancelModal(order._id)} className="px-4 py-2 text-sm font-medium bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors flex items-center gap-1.5">
+                        <button onClick={() => setCancelModal(order.id)} className="px-4 py-2 text-sm font-medium bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors flex items-center gap-1.5">
                             <XCircleIcon className="w-3.5 h-3.5" /> Cancel
                         </button>
                     )}

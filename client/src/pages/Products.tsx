@@ -247,7 +247,7 @@
 //                   .filter((product) => product.stock > 0)
 //                   .map((product) => (
 //                     <ProductCard
-//                       key={product._id}
+//                       key={product.id}
 //                       product={product}
 //                     />
 //                   ))}
@@ -306,18 +306,12 @@
 
 // export default Products;
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  Link,
-  useSearchParams,
-} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 
 import type { Product } from "../types";
 
-import {
-  categoriesData,
-  dummyProducts,
-} from "../assets/assets";
+import { categoriesData } from "../assets/assets";
 
 import {
   ChevronDown,
@@ -330,156 +324,66 @@ import {
 import ProductCard from "../components/ProductCard";
 import Loading from "../components/Loading";
 import FilterPanel from "../components/FilterPanel";
+import api from "../config/api";
+import { toast } from "react-hot-toast";
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 12;
 
 const Products = () => {
-  const [searchParams, setSearchParams] =
-    useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [products, setProducts] = useState<
-    Product[]
-  >([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [totalPages, setTotalPages] =
-    useState(1);
-
-  const [
-    mobileFilterOpen,
-    setMobileFilterOpen,
-  ] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   /* ---------------- QUERY PARAMS ---------------- */
 
-  const category =
-    searchParams.get("category") || "";
-
-  const organic =
-    searchParams.get("organic") || "";
-
-  const sort =
-    searchParams.get("sort") || "";
-
-  const page = Number(
-    searchParams.get("page") || "1"
-  );
-
-  const minPrice =
-    searchParams.get("minPrice") || "";
-
-  const maxPrice =
-    searchParams.get("maxPrice") || "";
+  const category = searchParams.get("category") || "";
+  const organic = searchParams.get("organic") || "";
+  const sort = searchParams.get("sort") || "";
+  const page = Number(searchParams.get("page") || "1");
+  const minPrice = searchParams.get("minPrice") || "";
+  const maxPrice = searchParams.get("maxPrice") || "";
 
   /* ---------------- FETCH PRODUCTS ---------------- */
 
   const fetchProducts = async () => {
     setLoading(true);
 
-    let filteredProducts = [
-      ...dummyProducts,
-    ];
+    try {
+      const params = new URLSearchParams();
 
-    // Category
-    if (category) {
-      filteredProducts =
-        filteredProducts.filter(
-          (p) =>
-            p.category === category
-        );
+      if (category) params.set("category", category);
+      if (organic) params.set("organic", organic);
+      if (sort) params.set("sort", sort);
+      if (minPrice) params.set("minPrice", minPrice);
+      if (maxPrice) params.set("maxPrice", maxPrice);
+
+      params.set("page", String(page));
+      params.set("limit", String(PRODUCTS_PER_PAGE));
+
+      const { data } = await api.get(
+        `/products?${params.toString()}`
+      );
+
+      setProducts(data.products || []);
+      setTotalPages(data.pages || 1);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to fetch products"
+      );
+    } finally {
+      setLoading(false);
     }
-
-    // Organic
-    if (organic === "true") {
-      filteredProducts =
-        filteredProducts.filter(
-          (p) => p.isOrganic === true
-        );
-    }
-
-    // Min Price
-    if (minPrice) {
-      filteredProducts =
-        filteredProducts.filter(
-          (p) =>
-            p.price >= Number(minPrice)
-        );
-    }
-
-    // Max Price
-    if (maxPrice) {
-      filteredProducts =
-        filteredProducts.filter(
-          (p) =>
-            p.price <= Number(maxPrice)
-        );
-    }
-
-    // Sorting
-    switch (sort) {
-      case "price_asc":
-        filteredProducts.sort(
-          (a, b) =>
-            a.price - b.price
-        );
-        break;
-
-      case "price_desc":
-        filteredProducts.sort(
-          (a, b) =>
-            b.price - a.price
-        );
-        break;
-
-      case "rating":
-        filteredProducts.sort(
-          (a, b) =>
-            b.rating - a.rating
-        );
-        break;
-
-      case "name":
-        filteredProducts.sort((a, b) =>
-          a.name.localeCompare(
-            b.name
-          )
-        );
-        break;
-
-      default:
-        break;
-    }
-
-    // Pagination
-    const start =
-      (page - 1) * PRODUCTS_PER_PAGE;
-
-    const end =
-      start + PRODUCTS_PER_PAGE;
-
-    setTotalPages(
-      Math.ceil(
-        filteredProducts.length /
-          PRODUCTS_PER_PAGE
-      )
-    );
-
-    setProducts(
-      filteredProducts.slice(start, end)
-    );
-
-    setLoading(false);
   };
+
+  /* ---------------- EFFECT ---------------- */
 
   useEffect(() => {
     fetchProducts();
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   }, [
     category,
     organic,
@@ -495,8 +399,7 @@ const Products = () => {
     key: string,
     value: string
   ) => {
-    const params =
-      new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams);
 
     if (value) {
       params.set(key, value);
@@ -504,7 +407,7 @@ const Products = () => {
       params.delete(key);
     }
 
-    // Reset page when filter changes
+    // Reset page when filters change
     if (key !== "page") {
       params.delete("page");
     }
@@ -516,23 +419,21 @@ const Products = () => {
     setSearchParams({});
   };
 
-  const activeCategory =
-    categoriesData.find(
-      (c) => c.slug === category
-    );
+  const activeCategory = categoriesData.find(
+    (c) => c.slug === category
+  );
 
   const hasFilters = Boolean(
-  category ||
-  organic ||
-  minPrice ||
-  maxPrice
-);
+    category ||
+      organic ||
+      minPrice ||
+      maxPrice
+  );
 
   /* ---------------- JSX ---------------- */
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Breadcrumb */}
@@ -554,8 +455,7 @@ const Products = () => {
         </nav>
 
         {/* Hero Banner */}
-        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-green-950 via-green-900 to-green-800 p-8 sm:p-10 mb-8">
-          
+        <div className="relative overflow-hidden rounded-4xl bg-linear-to-r from-green-950 via-green-900 to-green-800 p-8 sm:p-10 mb-8">
           <div className="absolute right-0 top-0 h-full w-1/2 opacity-10">
             <div className="absolute right-10 top-10 size-48 rounded-full bg-orange-400 blur-3xl" />
           </div>
@@ -573,10 +473,9 @@ const Products = () => {
             </h1>
 
             <p className="text-white/70 mt-4 text-base sm:text-lg max-w-xl leading-relaxed">
-              Discover fresh fruits,
-              vegetables, dairy, snacks,
-              and essentials delivered
-              straight to your doorstep.
+              Discover fresh fruits, vegetables, dairy,
+              snacks, and essentials delivered straight
+              to your doorstep.
             </p>
           </div>
         </div>
@@ -593,12 +492,8 @@ const Products = () => {
                 organic={organic}
                 minPrice={minPrice}
                 maxPrice={maxPrice}
-                updateFilter={
-                  updateFilter
-                }
-                clearFilters={
-                  clearFilters
-                }
+                updateFilter={updateFilter}
+                clearFilters={clearFilters}
                 hasFilters={hasFilters}
               />
             </div>
@@ -610,7 +505,6 @@ const Products = () => {
             {/* Top Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-8">
 
-              {/* Left */}
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
                   {activeCategory
@@ -621,28 +515,24 @@ const Products = () => {
                 <p className="text-zinc-500 mt-1 text-sm">
                   Showing{" "}
                   <span className="font-semibold text-zinc-800">
-                    {
-                      products.length
-                    }
+                    {products.filter(
+                      (product) => product.stock > 0
+                    ).length}
                   </span>{" "}
                   premium products
                 </p>
               </div>
 
-              {/* Right */}
               <div className="flex items-center gap-3">
 
                 {/* Mobile Filter */}
                 <button
                   onClick={() =>
-                    setMobileFilterOpen(
-                      true
-                    )
+                    setMobileFilterOpen(true)
                   }
                   className="lg:hidden flex items-center gap-2 px-4 py-3 bg-white rounded-2xl border border-zinc-200 shadow-sm hover:bg-zinc-50 transition-all"
                 >
                   <SlidersHorizontal className="size-4" />
-
                   <span className="text-sm font-medium">
                     Filters
                   </span>
@@ -663,19 +553,15 @@ const Products = () => {
                     <option value="">
                       Newest
                     </option>
-
                     <option value="price_asc">
                       Price: Low → High
                     </option>
-
                     <option value="price_desc">
                       Price: High → Low
                     </option>
-
                     <option value="rating">
                       Top Rated
                     </option>
-
                     <option value="name">
                       Name A-Z
                     </option>
@@ -690,21 +576,17 @@ const Products = () => {
             {loading ? (
               <Loading />
             ) : products.length === 0 ? (
-              <div className="bg-white border border-zinc-200 rounded-[32px] py-20 text-center shadow-sm">
-                
+              <div className="bg-white border border-zinc-200 rounded-4xl py-20 text-center shadow-sm">
                 <h3 className="text-2xl font-bold text-zinc-800 mb-3">
                   No Products Found
                 </h3>
 
                 <p className="text-zinc-500 mb-6">
-                  Try changing your
-                  filters or category.
+                  Try changing your filters or category.
                 </p>
 
                 <button
-                  onClick={
-                    clearFilters
-                  }
+                  onClick={clearFilters}
                   className="px-6 py-3 rounded-2xl bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
                 >
                   Clear Filters
@@ -714,17 +596,12 @@ const Products = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 xl:gap-7">
                 {products
                   .filter(
-                    (product) =>
-                      product.stock > 0
+                    (product) => product.stock > 0
                   )
                   .map((product) => (
                     <ProductCard
-                      key={
-                        product._id
-                      }
-                      product={
-                        product
-                      }
+                      key={product.id}
+                      product={product}
                     />
                   ))}
               </div>
@@ -762,22 +639,15 @@ const Products = () => {
       {/* Mobile Filter Drawer */}
       {mobileFilterOpen && (
         <>
-          {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             onClick={() =>
-              setMobileFilterOpen(
-                false
-              )
+              setMobileFilterOpen(false)
             }
           />
 
-          {/* Drawer */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white z-50 rounded-t-[32px] max-h-[85vh] overflow-y-auto border-t border-zinc-200 shadow-2xl animate-slide-in-up">
-
-            {/* Header */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white z-50 rounded-t-4xl max-h-[85vh] overflow-y-auto border-t border-zinc-200 shadow-2xl animate-slide-in-up">
             <div className="sticky top-0 bg-white flex items-center justify-between p-5 border-b border-zinc-200">
-              
               <div>
                 <h3 className="text-lg font-bold text-zinc-900">
                   Filters
@@ -790,9 +660,7 @@ const Products = () => {
 
               <button
                 onClick={() =>
-                  setMobileFilterOpen(
-                    false
-                  )
+                  setMobileFilterOpen(false)
                 }
                 className="size-10 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition-colors"
               >
@@ -800,7 +668,6 @@ const Products = () => {
               </button>
             </div>
 
-            {/* Content */}
             <div className="p-5">
               <FilterPanel
                 categories={categoriesData}
@@ -808,12 +675,8 @@ const Products = () => {
                 organic={organic}
                 minPrice={minPrice}
                 maxPrice={maxPrice}
-                updateFilter={
-                  updateFilter
-                }
-                clearFilters={
-                  clearFilters
-                }
+                updateFilter={updateFilter}
+                clearFilters={clearFilters}
                 hasFilters={hasFilters}
               />
             </div>

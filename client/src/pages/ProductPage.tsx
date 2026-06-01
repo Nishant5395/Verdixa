@@ -21,27 +21,27 @@
 //     setLoading(true)
 //     setLocalQuantity(1);
 //     window.scrollTo(0,0)
-//     const product=dummyProducts.find((p)=>p._id !==id)
+//     const product=dummyProducts.find((p)=>p.id !==id)
 //     setProduct(product!)
-//     setRelatedProducts(dummyProducts.filter((p)=>p._id !==id))
+//     setRelatedProducts(dummyProducts.filter((p)=>p.id !==id))
 //     setLoading(false)
 //   },[id,navigate])
 //   if(loading)return <Loading/>
 //   if(!product) return null;
-//   const cartItem=items.find((item)=>item.product._id===product._id)
+//   const cartItem=items.find((item)=>item.product.id===product.id)
 //   const inCart=!!cartItem;
 //   const displayQuantity=inCart ? cartItem.quantity:loacalQuantity
 // const handleMinus=()=>{
 //   if(inCart){
-//     if(cartItem.quantity >1)updateQuantity(product._id,cartItem.quantity-1)
-//       else removeFromCart(product._id)
+//     if(cartItem.quantity >1)updateQuantity(product.id,cartItem.quantity-1)
+//       else removeFromCart(product.id)
 //   }{
 //     setLocalQuantity(Math.max(1,loacalQuantity-1))
 //   }
 // }
 // const handlePlus=()=>{
 //   if(inCart){
-//     updateQuantity(product._id,cartItem.quantity+1)
+//     updateQuantity(product.id,cartItem.quantity+1)
      
 //   }
 //   else{
@@ -169,7 +169,7 @@
 //             </div>
 //             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 xl:gap-8">
 //               {relatedProduts.slice(0,5).map((rp)=>(
-//                 <ProductCard key={rp._id}product={rp}/>
+//                 <ProductCard key={rp.id}product={rp}/>
 //               ))}
 
 //             </div>
@@ -207,14 +207,13 @@ import {
 
 import type { Product } from "../types";
 
-import { dummyProducts } from "../assets/assets";
-
 import { useCart } from "../context/CartContext";
 
 import Loading from "../components/Loading";
 import ProductCard from "../components/ProductCard";
 
 import DummyReviewsSection from "../assets/DummyReviewsSection";
+import api from "../config/api";
 
 const ProductPage = () => {
   const currency =
@@ -251,31 +250,13 @@ const ProductPage = () => {
     setLocalQuantity(1);
 
     window.scrollTo(0, 0);
-
-    const foundProduct =
-      dummyProducts.find(
-        (p) => p._id === id
-      ) || null;
-
-    setProduct(foundProduct);
-
-    if (foundProduct) {
-      const related =
-        dummyProducts
-          .filter(
-            (p) =>
-              p.category ===
-                foundProduct.category &&
-              p._id !== foundProduct._id
-          )
-          .slice(0, 5);
-
-      setRelatedProducts(related);
-    }
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    api.get(`/products/${id}`).then(({data})=>{
+      setProduct(data.product);
+      return api.get(`/products?category=${data.product.category}`)
+      }).then(({data})=>{
+        setRelatedProducts(data.products.filter((p:Product)=>p.id!==id))
+      }).catch(()=>navigate("/products")).finally(()=>setLoading(false))
+  
   }, [id]);
 
   /* ---------------- STATES ---------------- */
@@ -312,7 +293,7 @@ const ProductPage = () => {
 
   const cartItem = items.find(
     (item) =>
-      item.product._id === product._id
+      item.product.id === product.id
   );
 
   const inCart = !!cartItem;
@@ -327,11 +308,11 @@ const ProductPage = () => {
     if (inCart && cartItem) {
       if (cartItem.quantity > 1) {
         updateQuantity(
-          product._id,
+          product.id,
           cartItem.quantity - 1
         );
       } else {
-        removeFromCart(product._id);
+        removeFromCart(product.id);
       }
     } else {
       setLocalQuantity((prev) =>
@@ -343,7 +324,7 @@ const ProductPage = () => {
   const handlePlus = () => {
     if (inCart && cartItem) {
       updateQuantity(
-        product._id,
+        product.id,
         cartItem.quantity + 1
       );
     } else {
@@ -391,7 +372,7 @@ const ProductPage = () => {
 
           <span>/</span>
 
-          <span className="text-app-green font-medium truncate max-w-[180px]">
+          <span className="text-app-green font-medium truncate max-w-45">
             {product.name}
           </span>
         </nav>
@@ -406,12 +387,12 @@ const ProductPage = () => {
         </button>
 
         {/* PRODUCT SECTION */}
-        <section className="bg-white border border-zinc-200 rounded-[32px] overflow-hidden shadow-sm">
+        <section className="bg-white border border-zinc-200rounded-4xl overflow-hidden shadow-sm">
 
           <div className="grid lg:grid-cols-2">
 
             {/* LEFT IMAGE */}
-            <div className="relative bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-8 md:p-14 min-h-[420px]">
+            <div className="relative bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-8 md:p-14 min-h-105">
 
               {/* Badges */}
               <div className="absolute top-5 left-5 flex flex-wrap gap-2 z-10">
@@ -439,7 +420,7 @@ const ProductPage = () => {
               <img
                 src={product.image}
                 alt={product.name}
-                className="max-h-[420px] object-contain hover:scale-105 transition-transform duration-500"
+                className="max-h-105 object-contain hover:scale-105 transition-transform duration-500"
               />
             </div>
 
@@ -659,7 +640,7 @@ const ProductPage = () => {
               {relatedProducts.map(
                 (rp) => (
                   <ProductCard
-                    key={rp._id}
+                    key={rp.id}
                     product={rp}
                   />
                 )

@@ -55,13 +55,13 @@
 //         ):(
 //           <div className="space-y-4">
 //             {orders.map((order)=>(
-//               <Link key={order._id} to={`/orders/${order._id}`}
+//               <Link key={order.id} to={`/orders/${order.id}`}
 //               className="block max-w-4xl bg-white rounded-2xl p-5 hover:shadow transition-all">
 //                 {/* order id,date & status */}
 //                 <div className="flex items-start justify-between mb-3">
 //                   {/* left */}
 //                   <div>
-//                     <p className="text-sm font-medium text-app-green">Order #{order._id.slice(-8).toUpperCase()}</p>
+//                     <p className="text-sm font-medium text-app-green">Order #{order.id.slice(-8).toUpperCase()}</p>
 //                     <div className="flex items-center gap-2 mt-1">
 //                       <CalendarIcon className="size-3 text-app-text-light"/>
 //                       <span className="text-xs text-app-text-light">{new Date(order.createdAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</span>
@@ -114,8 +114,7 @@ import type { Order } from "../types";
 import { useCart } from "../context/CartContext";
 
 import {
-  dummyDashboardOrdersData,
-  statusColors,
+  statusColors
 } from "../assets/assets";
 
 import Loading from "../components/Loading";
@@ -128,6 +127,8 @@ import {
   ShoppingBagIcon,
   TruckIcon,
 } from "lucide-react";
+import api from "../config/api";
+import { toast } from "react-hot-toast";
 
 const MyOrders = () => {
   const currency =
@@ -160,25 +161,17 @@ const MyOrders = () => {
   /* ---------------- FETCH ORDERS ---------------- */
 
   const fetchOrders = async () => {
-    setLoading(true);
-
-    setTimeout(() => {
-      let filteredOrders =
-        dummyDashboardOrdersData as Order[];
-
-      if (activeTab !== "all") {
-        filteredOrders =
-          filteredOrders.filter(
-            (order) =>
-              order.status ===
-              activeTab
-          );
-      }
-
-      setOrders(filteredOrders);
-
+    setLoading(true)
+    try {
+      const params=activeTab !== "all" ? `?status=${activeTab}` : "";
+      const {data}=await api.get(`/orders${params}`)
+      setOrders(data.orders)
+    } catch (error:any) {
+      toast.error(error.response?.data?.message || error?.message);
+      
+    }finally{
       setLoading(false);
-    }, 700);
+    }
   };
 
   /* ---------------- EFFECT ---------------- */
@@ -228,7 +221,7 @@ const MyOrders = () => {
           {/* STATS */}
           <div className="flex flex-wrap gap-4">
 
-            <div className="bg-white border border-zinc-200 rounded-2xl px-5 py-4 shadow-sm min-w-[140px]">
+            <div className="bg-white border border-zinc-200 rounded-2xl px-5 py-4 shadow-sm min-w-35">
               <div className="flex items-center gap-2 mb-2">
                 <ShoppingBagIcon className="size-4 text-app-green" />
 
@@ -242,7 +235,7 @@ const MyOrders = () => {
               </p>
             </div>
 
-            <div className="bg-white border border-zinc-200 rounded-2xl px-5 py-4 shadow-sm min-w-[140px]">
+            <div className="bg-white border border-zinc-200 rounded-2xl px-5 py-4 shadow-sm min-w-35">
               <div className="flex items-center gap-2 mb-2">
                 <TruckIcon className="size-4 text-app-green" />
 
@@ -286,7 +279,7 @@ const MyOrders = () => {
         ) : orders.length === 0 ? (
 
           /* EMPTY STATE */
-          <div className="bg-white border border-zinc-200 rounded-[32px] py-20 px-6 text-center shadow-sm">
+          <div className="bg-white border border-zinc-200 rounded-4xl py-20 px-6 text-center shadow-sm">
 
             <div className="size-20 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-6">
               <PackageIcon className="size-10 text-orange-500" />
@@ -317,8 +310,8 @@ const MyOrders = () => {
 
             {orders.map((order) => (
               <Link
-                key={order._id}
-                to={`/orders/${order._id}`}
+                key={order.id}
+                to={`/orders/${order.id}`}
                 className="block bg-white border border-zinc-200 rounded-[28px] p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
 
@@ -329,7 +322,7 @@ const MyOrders = () => {
                   <div>
                     <p className="text-lg font-bold text-zinc-900">
                       Order #
-                      {order._id
+                      {order.id
                         .slice(-8)
                         .toUpperCase()}
                     </p>

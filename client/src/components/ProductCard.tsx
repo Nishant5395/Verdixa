@@ -11,7 +11,7 @@
 //     const navigate=useNavigate()
 //   return (
 //     <div className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-300 group animate-fade-in cursor-pointer"
-//     onClick={()=>navigate(`/products/${product._id}`)}>
+//     onClick={()=>navigate(`/products/${product.id}`)}>
 //         {/*Image */}
 //         <div className="relative aspect-square overflow-hidden">
 //             <img src={product.image} alt={product.name} className="w-full h-full object-cover p-4 group-hover:p-2 transition-all duration-300"/>
@@ -67,7 +67,7 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      onClick={() => navigate(`/products/${product._id}`)}
+      onClick={() => navigate(`/products/${product.id}`)}
       className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
     >
       

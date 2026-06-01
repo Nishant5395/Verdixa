@@ -33,7 +33,7 @@ export default function CheckoutReview({ address, items, handlePlaceOrder, loadi
             {/* Items */}
             <div className="space-y-3 mb-5">
                 {items.map((item) => (
-                    <div key={item.product._id} className="flex items-center gap-3">
+                    <div key={item.product.id} className="flex items-center gap-3">
                         <img src={item.product.image} alt={item.product.name} className="size-12 rounded-lg object-cover" />
                         <div className="flex-1">
                             <p className="text-sm font-medium text-app-green">{item.product.name}</p>

@@ -3,6 +3,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
 import { inngest } from "../inngest/index.js";
+import Stripe from 'stripe'
 
 //Create order
 //POST/api/orders
@@ -60,6 +61,27 @@ export const createOrder=async(req:Request,res:Response)=>{
     })
     if(paymentMethod=="card"){
         //stripe payment link
+        const stripe=new Stripe(process.env.STRIPE_SECRET_KEY as string)
+        //create session
+const session = await stripe.checkout.sessions.create({
+  success_url: `${req.headers.origin}/orders?clearCart=true`,
+  cancel_url:`${req.headers.origin}/checkout`,
+  line_items: [
+    {
+      price_data: {
+        currency:"usd",
+        product_data:{
+            name:"Payment Groceries"
+        },
+        unit_amount:Math.round(total*100)
+      },
+      quantity: 1,
+    },
+  ],
+  mode: 'payment',
+  metadata:{orderId:order.id}
+});
+return res.json({url:session.url})
     }
     res.json({order})
 
@@ -98,6 +120,8 @@ export const getUserOrders=async(req:Request,res:Response)=>{
     })
     res.json({orders})
 }
+
+
 //Get single order
 //GET /api/orders/:id
 

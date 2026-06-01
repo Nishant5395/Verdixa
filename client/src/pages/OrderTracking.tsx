@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Order } from "../types";
-import { dummyDashboardOrdersData } from "../assets/assets";
 
 import Loading from "../components/Loading";
 
@@ -15,6 +14,7 @@ import {
 import OrderOTP from "../components/OrderTracking/OrderOTP";
 import LiveMap from "../components/OrderTracking/LiveMap";
 import OrderTimeLine from "../components/OrderTracking/OrderTimeLine";
+import api from "../config/api";
 
 const OrderTracking = () => {
   const currency =
@@ -37,28 +37,42 @@ const OrderTracking = () => {
     } | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+  api.get(`/orders/${id}`)
+    .then((res) => {
+      console.log("Order response:", res.data);
+      setOrder(res.data.order);
+    })
+    .catch((err) => {
+      console.log("Order fetch error:", err.response?.data);
+      navigate("/orders");
+    })
+    .finally(() => setLoading(false));
+}, [id, navigate]);
 
-    const foundOrder =
-      dummyDashboardOrdersData.find(
-        (o) => o._id === id
-      ) as Order | undefined;
-
-    if (foundOrder) {
-      setOrder(foundOrder);
-
-      if (foundOrder.liveLocation) {
-        setLiveLocation({
-          lat: foundOrder.liveLocation.lat,
-          lng: foundOrder.liveLocation.lng,
-        });
+  //live location every 10 seconds
+  useEffect(()=>{
+    if(!order || ["Delivered","Cancelled","Placed"].includes(order.status))return;
+    const fetchLocation=async()=>{
+      try {
+        const {data}=await api.get(`/orders/${id}/location`)
+        if(data.liveLocation?.lat && data.liveLocation?.lng && data.liveLocation.updatedAt){
+          setLiveLocation({
+            lat:data.liveLocation.lat,
+            lng:data.liveLocation.lng
+          })
+        }
+        //Also update order status if it changed
+        if(data.status && data.status !== order.status){
+          setOrder((prev)=>prev ? {...prev,status:data.status}:prev)
+        }
+      } catch {
+        
       }
     }
-
-    setLoading(false);
-
-    window.scrollTo(0, 0);
-  }, [id]);
+    fetchLocation()
+    const interval=setInterval(fetchLocation,10000)
+    return ()=>clearInterval(interval)
+  },[id,order?.status])
 
   if (loading) return <Loading />;
 
@@ -110,7 +124,7 @@ const OrderTracking = () => {
 
               <h1 className="text-2xl md:text-3xl font-bold text-zinc-900">
                 #
-                {order._id
+                {order.id
                   .slice(-8)
                   .toUpperCase()}
               </h1>
