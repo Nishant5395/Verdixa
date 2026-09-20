@@ -53,9 +53,11 @@ const App = () => {
       <Route path='delivery-partners' element={<AdminDeliveryPartners/>}/>
       </Route>
       {/* Delivery Partner pages */}
-      <Route path='/delivery/login' element={<DeliveryLogin/>}/>
-      <Route path='/delivery' element={<DeliveryLayout/>}/>
-      <Route index element={<DeliveryDashboard/>}/>
+      {/* Delivery Partner pages */}
+<Route path='/delivery/login' element={<DeliveryLogin/>}/>
+<Route path='/delivery' element={<DeliveryLayout/>}>
+  <Route index element={<DeliveryDashboard/>}/>
+</Route>
 
     </Routes>
     </>
