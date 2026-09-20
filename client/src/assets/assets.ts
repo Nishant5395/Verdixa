@@ -82,9 +82,9 @@ export const footerData = {
     ],
 
     contact: [
-        { icon: MapPinIcon, text: "123 Green Valley Rd, Portland" },
-        { icon: PhoneIcon, text: "+1 (111) 123-4567" },
-        { icon: MailIcon, text: "hello@example.com" },
+        { icon: MapPinIcon, text: "Sheikhpura, Bihar" },
+        { icon: PhoneIcon, text: "+91 7856045698" },
+        { icon: MailIcon, text: "anand@gmail.com" },
     ],
 
     bottom: {
