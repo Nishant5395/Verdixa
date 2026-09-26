@@ -1,9 +1,3 @@
-/**
- * Small, dependency-free fuzzy matching used for search suggestions and typo tolerance.
- * Fine for catalogues up to a few thousand products; for much larger catalogues move to
- * Postgres pg_trgm or a search service (Meilisearch / Typesense / Algolia).
- */
-
 export const normalizeText = (s: string) =>
   s
     .toLowerCase()

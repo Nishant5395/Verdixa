@@ -1,13 +1,4 @@
-/**
- * Pricing rules live here so the server is the single source of truth.
- * Defaults match the previous hard-coded behaviour (USD, 8% tax, $1.99 delivery under 20),
- * so nothing changes until you set these env vars, e.g. for an Indian store:
- *
- *   CURRENCY=inr
- *   TAX_RATE=0.05
- *   DELIVERY_FEE=30
- *   FREE_DELIVERY_THRESHOLD=499
- */
+
 const readNumber = (value: string | undefined, fallback: number) => {
   if (value === undefined || value.trim() === "") return fallback;
   const n = Number(value);
