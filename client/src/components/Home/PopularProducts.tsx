@@ -35,6 +35,80 @@
 // }
 
 // export default PopularProducts
+// import { useEffect, useState } from "react";
+
+// import { Link } from "react-router-dom";
+// import { ArrowRightIcon } from "lucide-react";
+// import ProductCard from "../ProductCard";
+// import type { Product } from "../../types";
+// import api from "../../config/api";
+// import { toast } from "react-hot-toast";
+
+// const PopularProducts = () => {
+//   const [products, setProducts] = useState<Product[]>([]);
+
+//   useEffect(() => {
+//     api.get('/products?sort=rating').then(({data})=>{
+//       setProducts(data.products);
+//     }).catch((error:any)=>{
+//       toast.error(error.response.data.message || error?.message);
+//     })
+    
+//   }, []);
+
+//   return (
+//     <section className="py-16">
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+//         {/* Header */}
+//         <div className="flex items-end justify-between mb-10">
+          
+//           <div>
+//             <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
+//               Popular Products
+//             </h2>
+
+//             <p className="text-sm sm:text-base text-zinc-500 mt-2">
+//               Most ordered groceries this week
+//             </p>
+//           </div>
+
+//           <Link
+//             to="/products"
+//             className="hidden sm:flex items-center gap-1 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+//           >
+//             View All
+//             <ArrowRightIcon className="size-4" />
+//           </Link>
+//         </div>
+
+//         {/* Product Grid */}
+//         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+//           {products.slice(0,10).map((product) => (
+//             <ProductCard
+//               key={product.id}
+//               product={product}
+//             />
+//           ))}
+//         </div>
+
+//         {/* Mobile Button */}
+//         <div className="flex justify-center mt-10 sm:hidden">
+//           <Link
+//             to="/products"
+//             className="flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors"
+//           >
+//             View All Products
+//             <ArrowRightIcon className="size-4" />
+//           </Link>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// };
+
+// export default PopularProducts;
+
 import { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
@@ -64,7 +138,7 @@ const PopularProducts = () => {
         <div className="flex items-end justify-between mb-10">
           
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-app-ink">
               Popular Products
             </h2>
 
@@ -75,7 +149,7 @@ const PopularProducts = () => {
 
           <Link
             to="/products"
-            className="hidden sm:flex items-center gap-1 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+            className="hidden sm:flex items-center gap-1 text-sm font-semibold text-app-gold-dark hover:text-app-gold-dark transition-colors"
           >
             View All
             <ArrowRightIcon className="size-4" />
@@ -96,7 +170,7 @@ const PopularProducts = () => {
         <div className="flex justify-center mt-10 sm:hidden">
           <Link
             to="/products"
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors"
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-app-gold hover:bg-app-gold-dark text-white font-medium transition-colors"
           >
             View All Products
             <ArrowRightIcon className="size-4" />

@@ -66,3 +66,8 @@ export type Order = Prisma.OrderModel
  * 
  */
 export type DeliveryPartner = Prisma.DeliveryPartnerModel
+/**
+ * Model Coupon
+ * 
+ */
+export type Coupon = Prisma.CouponModel

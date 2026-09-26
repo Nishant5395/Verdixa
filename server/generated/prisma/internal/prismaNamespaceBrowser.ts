@@ -55,7 +55,8 @@ export const ModelName = {
   Address: 'Address',
   Product: 'Product',
   Order: 'Order',
-  DeliveryPartner: 'DeliveryPartner'
+  DeliveryPartner: 'DeliveryPartner',
+  Coupon: 'Coupon'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -96,6 +97,7 @@ export const AddressScalarFieldEnum = {
   city: 'city',
   state: 'state',
   zip: 'zip',
+  country: 'country',
   isDefault: 'isDefault',
   lat: 'lat',
   lng: 'lng',
@@ -142,6 +144,9 @@ export const OrderScalarFieldEnum = {
   deliveryOtp: 'deliveryOtp',
   liveLocation: 'liveLocation',
   isPaid: 'isPaid',
+  couponCode: 'couponCode',
+  discount: 'discount',
+  stockReserved: 'stockReserved',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -163,6 +168,28 @@ export const DeliveryPartnerScalarFieldEnum = {
 } as const
 
 export type DeliveryPartnerScalarFieldEnum = (typeof DeliveryPartnerScalarFieldEnum)[keyof typeof DeliveryPartnerScalarFieldEnum]
+
+
+export const CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  description: 'description',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  minOrderValue: 'minOrderValue',
+  maxDiscount: 'maxDiscount',
+  usageLimit: 'usageLimit',
+  usedCount: 'usedCount',
+  perUserLimit: 'perUserLimit',
+  firstOrderOnly: 'firstOrderOnly',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
 
 
 export const SortOrder = {
