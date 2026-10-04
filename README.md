@@ -151,16 +151,5 @@ The backend was validated with an automated integration test suite (150+ asserti
 
 ---
 
-## 📸 Screenshots
-
-*(Add a few screenshots or a short demo GIF here — homepage, product search, checkout, and the chat widget are good ones to show.)*
-
----
-
-## 📄 License
-
-[Add your license here, e.g. MIT]
-
----
 
 Built by [Nishant Anand](https://github.com/Nishant5395)
