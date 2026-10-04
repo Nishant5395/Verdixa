@@ -1,6 +1,6 @@
 # Verdixa 🥬
 
-A full-stack online grocery delivery platform — think Zepto, Swiggy Instamart, or Blinkit — built end-to-end with a modern React/TypeScript frontend and a Node.js/Express backend. Customers browse, search, and order groceries with live delivery tracking; delivery partners manage their own deliveries; admins run the store from a dashboard.
+A full-stack online grocery delivery platform — built end-to-end with a modern React/TypeScript frontend and a Node.js/Express backend. Customers browse, search, and order groceries with live delivery tracking; delivery partners manage their own deliveries; admins run the store from a dashboard.
 
 **Live demo:** [https://verdixa.vercel.app/]
 **Repo:** https://github.com/Nishant5395/Verdixa
